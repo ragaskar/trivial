@@ -1,53 +1,5 @@
-class Vulnerability
-  def initialize(data)
-    @data = data
-  end
-
-  def severity
-    severity = @data["Severity"].downcase
-    return severity if severity != "critical"
-
-    max_cvss_score = @data["CVSS"].inject(0) do |max_score, (source, score_data)|
-      score = score_data["V3Score"] || 0
-      max_score = [max_score, score].max
-    end
-    if max_cvss_score == 10
-      "catastrophic"
-    else
-      "critical"
-    end
-  end
-end
-
-class TargetResults
-  SEVERITY_TYPES = ['catastrophic', 'critical', 'high', 'medium', 'low', 'unknown']
-
-  class SeverityTypeError < StandardError
-  end
-
-  def initialize()
-    @results = {}
-    SEVERITY_TYPES.each { |type| @results[type] = [] }
-  end
-
-  def add(vuln)
-    raise SeverityTypeError.new("Unknown Severity Type #{vuln.severity}") unless @results.has_key?(vuln.severity)
-    @results[vuln.severity].push(vuln)
-  end
-
-  def total_vuln_count
-    SEVERITY_TYPES.inject(0) {|sum, type| sum += self.send("#{type}_count") }
-  end
-
-  SEVERITY_TYPES.each do |type|
-    #not right for catastrophic/critical :)
-    define_method "#{type}_count" do
-      @results[type].count
-    end
-  end
-
-end
-
+require './models/vulnerability.rb'
+require './models/target_results.rb'
 require 'JSON'
 #PARSE
 scan_results_directory = ARGV[0]
