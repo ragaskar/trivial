@@ -7,5 +7,5 @@ ruby render.rb /path/to/json/trivy/results
 
 Run tests: 
 
-gem install rspec
-rspec spec
+bundle install
+rspec
