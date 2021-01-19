@@ -2,9 +2,26 @@ require_relative './models/vulnerability.rb'
 require_relative './models/vuln_aggregator.rb'
 require_relative './models/trivy_json_parser.rb'
 require 'JSON'
-#PARSE
-scan_results_directory = ARGV[0]
-vuln_aggregator = TrivyJsonParser.new.parse(scan_results_directory)
+require 'optparse'
+#you must mutate a hash with opt_parse and also
+#destructively mutate ARGV if you want non-flag args -- kinda gross.
+config = {}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: render.rb [options] [directory]"
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end
+opt_parser.parse!(ARGV) #config now has command line options.
+
+if (ARGV.length == 0)
+  opt_parser.parse %w[--help]
+end
+
+
+
+vuln_aggregator = TrivyJsonParser.new.parse(ARGV[0])
 #RENDER
 puts "\n\n"
 summary = []
