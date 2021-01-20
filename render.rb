@@ -1,37 +1,16 @@
 require_relative './models/vulnerability.rb'
 require_relative './models/vuln_aggregator.rb'
 require_relative './models/trivy_json_parser.rb'
+require_relative './models/flag_parser.rb'
 require 'JSON'
-require 'optparse'
-#you must mutate a hash with opt_parse and also
-#destructively mutate ARGV if you want non-flag args -- kinda gross.
-config = {format: 'text'}
-opt_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: render.rb [options] [directory]"
-  opts.on("-fFORMAT", "--format=FORMAT", "Choose an output format, valid values: 'text' (default), 'csv'") do |format|
-    config[:format] = format
-  end
-  opts.on("-sSEVERITY", "--severity=SEVERITY", "Filter for a specific severity: #{VulnAggregator::SEVERITY_TYPES.join(", ")}") do |severity|
-    config[:severity_filter] = severity
-  end
-  opts.on("-h", "--help", "Prints this help") do
-    puts opts
-    exit
-  end
-end
-opt_parser.parse!(ARGV) #config now has command line options.
-
-if (ARGV.length == 0)
-  opt_parser.parse %w[--help]
-end
 
 
+config = FlagParser.parse!(ARGV) #destructively mutates ARGV such that all flags params are removed.
 vuln_aggregator = TrivyJsonParser.new.parse(ARGV[0])
 #RENDER
-if config[:format] == 'text'
-  puts "\n\n"
+if config.format == 'text'
   summary = []
-  severities = config[:severity_filter] ? [config[:severity_filter]] : vuln_aggregator.severities
+  severities = config.severity_filter ? [config.severity_filter] : vuln_aggregator.severities
   severities.each do |severity|
     severity_results = vuln_aggregator.by_severity(severity)
     if severity_results.total_vuln_count == 0
@@ -46,11 +25,11 @@ if config[:format] == 'text'
         targets = image_results.targets
         targets.each do |target|
           target_results = image_results.by_target(target)
+          summary.push("\tTarget: #{target}\n")
           target_results.each do |target_vuln|
-            summary.push("Target: #{target_vuln.target}")
-            summary.push("#{target_vuln.vulnerability_id} : Score #{target_vuln.score}")
-            summary.push("#{target_vuln.url}")
-            summary.push("#{target_vuln.description}")
+            summary.push("\t  #{target_vuln.vulnerability_id} #{target_vuln.package_name} #{target_vuln.title} (Score #{target_vuln.score})")
+            summary.push("\t  #{target_vuln.url}")
+            summary.push("\t  #{target_vuln.description}")
             summary.push("\n")
           end
         end

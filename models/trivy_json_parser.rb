@@ -9,13 +9,13 @@ class TrivyJsonParser
       #whole file goes in memory, may not scale but easy
       result_json = File.read(relative_filename)
       if result_json == "null" || result_json == ""
-        puts "Skipping #{relative_filename}, content was '#{result_json}'"
+        STDERR.puts "Skipping #{relative_filename}, content was '#{result_json}'"
         next
       end
       begin
         results = JSON.parse(result_json)
       rescue JSON::ParserError => e
-        puts "Error #{e} while parsing #{relative_filename}"
+        STDERR.puts "Error #{e} while parsing #{relative_filename}"
       end
 
       # this is specific to our pipeline, not by default in trivy.
