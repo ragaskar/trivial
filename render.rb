@@ -10,7 +10,11 @@ config = FlagParser.parse!(ARGV) #destructively mutates ARGV such that all flags
 vuln_aggregator = TrivyJsonParser.new.parse(ARGV[0])
 #RENDER
 renderer = Renderer.new(vuln_aggregator)
-if config.format == 'text'
+
+case config.format
+when 'text'
   puts renderer.text_report(config.severity_filter ? [config.severity_filter] : vuln_aggregator.severities)
+when 'csv'
+  puts renderer.csv_report(config.severity_filter ? [config.severity_filter] : vuln_aggregator.severities)
 end
 

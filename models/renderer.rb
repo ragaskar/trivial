@@ -1,12 +1,36 @@
+require 'csv'
+
 class Renderer
   def initialize(vuln_aggregator)
     @vuln_aggregator = vuln_aggregator
   end
 
+  def csv_report(severities)
+    results = @vuln_aggregator.select { |v| severities.include?(v.severity) }.sort_by { |v| [VulnAggregator::SEVERITY_TYPES.index(v.severity), v.image, v.target] }
+    CSV.generate do |csv|
+      cols = [
+        ["vulnerability_id", "CVE ID"],
+        ["severity", "Severity"],
+        ["score", "Score"],
+        ["image", "Image"],
+        ["target", "Target"],
+        ["package_name", "Package Name"],
+        ["title", "Title"],
+        ["url", "URL"],
+        ["description", "Description"]
+      ]
+      csv << cols.map { |c| c[1] }
+      results.each do |v|
+        csv << cols.map { |c| v.send(c[0]) }
+      end
+    end
+  end
+
   def text_report(severities)
     summary = []
     severities.each do |severity|
-      severity_results =  grouped_result_set(severity)
+      by_severity_vulns = @vuln_aggregator.by_severity(severity)
+      severity_results =  by_severity_vulns.sort_by { |v| [v.image, v.target] }
       if severity_results.length == 0
         summary.push("No #{severity} vulnerabilities found")
         next
@@ -42,10 +66,4 @@ class Renderer
     summary.join("\n")
   end
 
-  private
-  def grouped_result_set(severity)
-    by_severity_vulns = @vuln_aggregator.by_severity(severity)
-    #sort by image + target
-    by_severity_vulns.sort_by { |v| [v.image, v.target] }
-  end
 end
