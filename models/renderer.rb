@@ -14,6 +14,7 @@ class Renderer
         ["score", "Score"],
         ["image", "Image"],
         ["target", "Target"],
+        ["distro", "Distro"],
         ["package_name", "Package Name"],
         ["title", "Title"],
         ["url", "URL"],
