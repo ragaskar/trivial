@@ -28,7 +28,7 @@ class TrivyJsonParser
 
       filename = File.basename(relative_filename)
       #may not work if there is a : in the imagePath or Tag. ;)
-      imagePath, imageTag = filename.sub(".trivy.json", "").sub("__", "/").split(":")
+      imagePath, imageTag = filename.sub("-trivy.json", "").sub(".trivy.json", "").sub("__", "/").split(":")
 
       if (!results.empty?)
         results.each do |result|
