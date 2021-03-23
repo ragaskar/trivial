@@ -18,6 +18,8 @@ class Renderer
         ["package_name", "Package Name"],
         ["title", "Title"],
         ["url", "URL"],
+        ["installed_version", "Installed Version"],
+        ["fixed_version", "Fixed Version"],
         ["description", "Description"]
       ]
       csv << cols.map { |c| c[1] }
@@ -53,6 +55,8 @@ class Renderer
           summary.push("\t  #{result.vulnerability_id} #{result.package_name} #{result.title} (Score #{result.score})")
           summary.push("\t  #{result.url}")
           summary.push("\t  #{result.description}")
+          summary.push("\t  Installed Version: #{result.installed_version}")
+          summary.push("\t  Fixed Version: #{result.fixed_version}")
           summary.push("\n")
         end
       end
