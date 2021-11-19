@@ -30,14 +30,12 @@ class TrivyJsonParser
       #may not work if there is a : in the imagePath or Tag. ;)
       imagePath, imageTag = filename.sub("-trivy.json", "").sub(".trivy.json", "").sub("__", "/").split(":")
 
-      if (!report.empty?)
-        results = report["Results"] || []
-        results.each do |result|
-          target_vuln_data = result["Vulnerabilities"] || []
-          target_vuln_data.each do |vuln_data|
-            vuln = Vulnerability.new(imagePath, imageTag, result["Target"], vuln_data)
-            vuln_aggregator.add(vuln)
-          end
+      results = report.is_a?(Array) ? report : (report && report["Results"]) || []
+      results.each do |result|
+        target_vuln_data = result["Vulnerabilities"] || []
+        target_vuln_data.each do |vuln_data|
+          vuln = Vulnerability.new(imagePath, imageTag, result["Target"], vuln_data)
+          vuln_aggregator.add(vuln)
         end
       end
     end
