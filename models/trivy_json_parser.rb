@@ -13,7 +13,7 @@ class TrivyJsonParser
         next
       end
       begin
-        results = JSON.parse(result_json)
+        report = JSON.parse(result_json)
       rescue JSON::ParserError => e
         STDERR.puts "Error #{e} while parsing #{relative_filename}"
       end
@@ -30,7 +30,8 @@ class TrivyJsonParser
       #may not work if there is a : in the imagePath or Tag. ;)
       imagePath, imageTag = filename.sub("-trivy.json", "").sub(".trivy.json", "").sub("__", "/").split(":")
 
-      if (!results.empty?)
+      if (!report.empty?)
+        results = report["Results"] || []
         results.each do |result|
           target_vuln_data = result["Vulnerabilities"] || []
           target_vuln_data.each do |vuln_data|
